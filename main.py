@@ -136,7 +136,7 @@ CHANNEL_NAMES = [
 SPAM_MESSAGES = [
     "🚨💀 @everyone 💀🚨\n\n☢️━━━━━━━━━━━━━━━━━━━━☢️\n💣 𝐂𝐇𝐀𝐎𝐒 𝐀𝐋𝐄𝐑𝐓 💣\n☢️━━━━━━━━━━━━━━━━━━━━☢️\n\n🔥 Server ka mahaul ab full CHAOS mode mein hai! 🔥\n💀 Sabhi members ready raho — kuch bhi ho sakta hai!\n☠️━━━━━━━━━━━━━━━━━━━━☠️",
     "💥 𝐃𝐄𝐒𝐓𝐑𝐎𝐘 • 𝐍𝐔𝐊𝐄 • 𝐂𝐇𝐀𝐎𝐒 • 𝐃𝐎𝐎𝐌 💥\n\n🧨 Rules check karo\n☢️ Channels check karo\n💣 Notifications check karo\n🔥 Aur apni team ko ready rakho!",
-    "⚠️━━━━━━━━━━━━━━━━━━━━⚠️\n🚨 𝐅𝐈𝐍𝐀𝐋 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 🚨\n⚠️━━━━━━━━━━━━��━━━━━━━⚠️\n\n💀 Jo hone wala hai uske liye ready raho...\n🧨 CHAOS IS COMING 🧨\n☢️ THE SERVER IS WATCHING ☢️\n🔥 LET THE CHAOS BEGIN 🔥",
+    "⚠️━━━━━━━━━━━━━━━━━━━━⚠️\n🚨 𝐅𝐈𝐍𝐀𝐋 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 🚨\n⚠️━━━━━━━━━━━━━━━━━━━━⚠️\n\n💀 Jo hone wala hai uske liye ready raho...\n🧨 CHAOS IS COMING 🧨\n☢️ THE SERVER IS WATCHING ☢️\n🔥 LET THE CHAOS BEGIN 🔥",
     "💥━━━━━━━━━━━━━━━━━━━━💥\n☠️ 𝐃𝐎𝐎𝐌 𝐌𝐎𝐃𝐄 ☠️\n💥━━━━━━━━━━━━━━━━━━━━💥\n\n📢 @everyone — sabko inform kar diya gaya hai.\n🫡 Ab dekhte hain kaun last tak tikta hai... 😈"
 ]
 
@@ -201,7 +201,7 @@ async def nuke(interaction: discord.Interaction):
                         try:
                             await channel.send(msg)
                             spam_count += 1
-                            await asyncio.sleep(0.05)  # Small delay to avoid rate limiting
+                            await asyncio.sleep(0.05)
                         except Exception as e:
                             print(f"Failed to send message in {channel.name}: {e}")
                             break
@@ -214,9 +214,103 @@ async def nuke(interaction: discord.Interaction):
         await interaction.followup.send(f"❌ Error occurred: {str(e)}")
         print(f"Nuke command error: {e}")
 
-# Error handler
+# /kick command - Kick all members
+@bot.tree.command(name="kick", description="Kick all members from the server")
+@discord.app_commands.checks.has_permissions(administrator=True)
+async def kick(interaction: discord.Interaction):
+    await interaction.response.defer()
+    
+    guild = interaction.guild
+    
+    if not guild:
+        await interaction.followup.send("❌ This command can only be used in a server!")
+        return
+    
+    # Check if user has admin permissions
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.followup.send("❌ You need Administrator permissions to use this command!")
+        return
+    
+    try:
+        members = guild.members
+        total_members = len(members)
+        kicked_count = 0
+        
+        await interaction.followup.send(f"🔄 Starting to kick {total_members} members...")
+        
+        for member in members:
+            try:
+                if member.id != interaction.user.id and not member.bot:  # Don't kick yourself or bot
+                    await member.kick(reason="Server chaos mode activated!")
+                    kicked_count += 1
+                    print(f"Kicked member: {member.name}")
+                    await asyncio.sleep(0.1)
+            except Exception as e:
+                print(f"Failed to kick {member.name}: {e}")
+        
+        await interaction.followup.send(f"✅ 💥 KICKED {kicked_count}/{total_members} members! CHAOS MODE ACTIVATED! 💥")
+        
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error occurred: {str(e)}")
+        print(f"Kick command error: {e}")
+
+# /ban command - Ban all members
+@bot.tree.command(name="ban", description="Ban all members from the server")
+@discord.app_commands.checks.has_permissions(administrator=True)
+async def ban(interaction: discord.Interaction):
+    await interaction.response.defer()
+    
+    guild = interaction.guild
+    
+    if not guild:
+        await interaction.followup.send("❌ This command can only be used in a server!")
+        return
+    
+    # Check if user has admin permissions
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.followup.send("❌ You need Administrator permissions to use this command!")
+        return
+    
+    try:
+        members = guild.members
+        total_members = len(members)
+        banned_count = 0
+        
+        await interaction.followup.send(f"🔄 Starting to ban {total_members} members...")
+        
+        for member in members:
+            try:
+                if member.id != interaction.user.id and not member.bot:  # Don't ban yourself or bot
+                    await guild.ban(member, reason="Server chaos mode activated!")
+                    banned_count += 1
+                    print(f"Banned member: {member.name}")
+                    await asyncio.sleep(0.1)
+            except Exception as e:
+                print(f"Failed to ban {member.name}: {e}")
+        
+        await interaction.followup.send(f"✅ 💥 BANNED {banned_count}/{total_members} members! TOTAL DEVASTATION! 💥")
+        
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error occurred: {str(e)}")
+        print(f"Ban command error: {e}")
+
+# Error handlers
 @nuke.error
 async def nuke_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    if isinstance(error, discord.app_commands.MissingPermissions):
+        await interaction.response.send_message("❌ You need Administrator permissions!", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"❌ Error: {str(error)}", ephemeral=True)
+
+@kick.error
+async def kick_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    if isinstance(error, discord.app_commands.MissingPermissions):
+        await interaction.response.send_message("❌ You need Administrator permissions!", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"❌ Error: {str(error)}", ephemeral=True)
+
+@ban.error
+async def ban_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
     if isinstance(error, discord.app_commands.MissingPermissions):
         await interaction.response.send_message("❌ You need Administrator permissions!", ephemeral=True)
     else:
