@@ -16,11 +16,17 @@ bot = commands.Bot(command_prefix="/", intents=intents)
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    print(f'Bot is ready and online!')
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(e)
+
+# /start command - Bot status
+@bot.tree.command(name="start", description="Check if bot is running")
+async def start(interaction: discord.Interaction):
+    await interaction.response.send_message("✅ Bot is running and online! 24/7 active!")
 
 # /nuke command - Delete all channels
 @bot.tree.command(name="nuke", description="Delete all channels in the server")
